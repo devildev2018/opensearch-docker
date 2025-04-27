@@ -1,0 +1,131 @@
+version: "2.4"
+
+services:
+  opensearch-node1:
+    image: opensearchproject/opensearch:latest
+    container_name: opensearch-node1
+    hostname: opensearch-node1
+    environment:
+      - node.name=opensearch-node1
+      - node.roles=cluster_manager,data,ingest
+      - bootstrap.memory_lock=true
+      - OPENSEARCH_INITIAL_ADMIN_PASSWORD=1nf0M@t1cs
+      - OPENSEARCH_JAVA_OPTS=-Xms1g -Xmx1g
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    volumes:
+      - ./data/opensearch-node1:/usr/share/opensearch/data
+      - ./certs/certs/:/usr/share/opensearch/config/certs
+      - ./opensearch.yml:/usr/share/opensearch/config/opensearch.yml
+      #- #./securityconfig/:/usr/share/opensearch/config/opensearch-security/
+      - ./logs/opensearch-node1:/usr/share/opensearch/logs
+    # - ./entrypoint.sh:/usr/local/bin/entrypoint.sh
+    restart: always
+    ports:
+      - 9200:9200
+      - 9600:9600
+    #entrypoint: ["/bin/bash", "/usr/local/bin/entrypoint.sh"]
+    networks:
+      - opensearch-net
+
+  opensearch-node2:
+    image: opensearchproject/opensearch:latest
+    container_name: opensearch-node2
+    hostname: opensearch-node2
+    environment:
+      - node.name=opensearch-node2
+      - node.roles=cluster_manager,data,ingest
+      - bootstrap.memory_lock=true
+      - OPENSEARCH_INITIAL_ADMIN_PASSWORD=1nf0M@t1cs
+      - OPENSEARCH_JAVA_OPTS=-Xms1g -Xmx1g
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    volumes:
+      - ./data/opensearch-node2:/usr/share/opensearch/data
+      - ./certs/certs/:/usr/share/opensearch/config/certs:ro
+      - ./opensearch.yml:/usr/share/opensearch/config/opensearch.yml
+      - ./logs/opensearch-node2:/usr/share/opensearch/logs
+    restart: always
+    networks:
+      - opensearch-net
+
+  opensearch-node3:
+    image: opensearchproject/opensearch:latest
+    container_name: opensearch-node3
+    hostname: opensearch-node3
+    environment:
+      - node.name=opensearch-node3
+      - node.roles=data,ingest
+      - bootstrap.memory_lock=true
+      - OPENSEARCH_INITIAL_ADMIN_PASSWORD=1nf0M@t1cs
+      - OPENSEARCH_JAVA_OPTS=-Xms1g -Xmx1g
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    volumes:
+      - ./data/opensearch-node3:/usr/share/opensearch/data
+      - ./certs/certs/:/usr/share/opensearch/config/certs:ro
+      - ./opensearch.yml:/usr/share/opensearch/config/opensearch.yml
+      - ./logs/opensearch-node3:/usr/share/opensearch/logs
+    restart: always
+    networks:
+      - opensearch-net
+
+  opensearch-node4:
+    image: opensearchproject/opensearch:latest
+    container_name: opensearch-node4
+    hostname: opensearch-node4
+    environment:
+      - node.name=opensearch-node4
+      - node.roles=data,ingest
+      - bootstrap.memory_lock=true
+      - OPENSEARCH_INITIAL_ADMIN_PASSWORD=1nf0M@t1cs
+      - OPENSEARCH_JAVA_OPTS=-Xms1g -Xmx1g
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    volumes:
+      - ./data/opensearch-node4:/usr/share/opensearch/data
+      - ./certs/certs:/usr/share/opensearch/config/certs:ro
+      - ./opensearch.yml:/usr/share/opensearch/config/opensearch.yml
+      - ./logs/opensearch-node4:/usr/share/opensearch/logs
+    restart: always
+    networks:
+      - opensearch-net
+
+  opensearch-dashboards:
+    image: opensearchproject/opensearch-dashboards:latest # Make sure the version of opensearch-dashboards matches the version of opensearch installed on other nodes
+    container_name: opensearch-dashboards
+    ports:
+      - 5601:5601 # Map host port 5601 to container port 5601
+    expose:
+      - "5601" # Expose port 5601 for web access to OpenSearch Dashboards
+    environment:
+      OPENSEARCH_HOSTS: '["https://opensearch-node1:9200","https://opensearch-node2:9200"]' # Define the OpenSearch nodes that OpenSearch Dashboards will query
+    networks:
+      - opensearch-net
+    depends_on:
+      - opensearch-node1
+      - opensearch-node2
+      - opensearch-node3
+      - opensearch-node4
+networks:
+  opensearch-net:
