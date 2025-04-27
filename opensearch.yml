@@ -1,0 +1,88 @@
+# ======================== Opensearch Configuration =========================
+
+# --------------------------------- Debugging ----------------------------------
+#logger.org.elasticsearch.index.reindex: debug
+# --------------------------------- /Debugging ----------------------------------
+
+# Network settings
+http.port: 9200
+network.host: 0.0.0.0
+
+discovery.seed_hosts: [ "opensearch-node1", "opensearch-node2", "opensearch-node3", "opensearch-node4" ]
+cluster.initial_cluster_manager_nodes: [ "opensearch-node1", "opensearch-node2" ]
+
+# Memory settings
+bootstrap.memory_lock: true
+
+# Circuit breaker settings
+indices.breaker.total.use_real_memory: true
+indices.breaker.total.limit: 95%
+
+# Security settings
+plugins.security.disabled: false
+
+plugins.security.authcz.admin_dn:
+  - "CN=admin,O=Test,L=Test,ST=Test,C=DE"
+plugins.security.nodes_dn:
+  - "CN=*,O=Test,L=Test,ST=Test,C=DE"
+
+plugins.security.allow_unsafe_democertificates: false
+plugins.security.allow_default_init_securityindex: true
+plugins.security.enable_snapshot_restore_privilege: true
+plugins.security.check_snapshot_restore_write_privileges: true
+plugins.security.restapi.roles_enabled:
+  ["all_access", "security_rest_api_access"]
+
+# Protected indices
+plugins.security.protected_indices.enabled: true
+plugins.security.protected_indices.roles: ["admin", "data_analyst"]
+plugins.security.protected_indices.indices: ["sensitive-*"]
+
+plugins.security.ssl.transport.truststore_filepath: certs/truststore.jks
+plugins.security.ssl.transport.pemcert_filepath: certs/admin.pem
+plugins.security.ssl.transport.pemkey_filepath: certs/admin-key.pem
+plugins.security.ssl.transport.pemtrustedcas_filepath: certs/root-ca.pem
+plugins.security.ssl.transport.enabled: true
+plugins.security.ssl.http.enabled: true
+plugins.security.ssl.http.pemcert_filepath: certs/elkstack-node.pem
+plugins.security.ssl.http.pemkey_filepath: certs/elkstack-node-key.pem
+plugins.security.ssl.http.pemtrustedcas_filepath: certs/root-ca.pem
+plugins.security.ssl.transport.enforce_hostname_verification: false
+plugins.security.ssl.transport.resolve_hostname: false
+
+
+# Snapshot settings
+snapshot.max_concurrent_operations: 1000
+
+# Deprecation log settings
+logger.deprecation.level: WARN
+
+# Audit log settings
+# Reference: https://opensearch.org/docs/latest/security/audit-logs/field-reference/
+##### Remember .config ...
+plugins.security.audit.config.enable_rest: true
+plugins.security.audit.config.enable_transport: true
+
+# Enable audit logging
+plugins.security.audit.config.type: internal_opensearch
+
+# Hide auth header / dont log auth header in plaintext.
+plugins.security.audit.config.exclude_sensitive_headers: true
+
+# Log requests made to specific indices:
+#plugins.security.audit.config.ignore_requests: ["indices:data/read/*", "SearchRequest"]
+
+# Log requests made by all users
+plugins.security.audit.config.ignore_users: NONE
+
+# Categories to log:
+# plugins.security.audit.config.disabled_rest_categories: AUTHENTICATED, opensearch_SECURITY_INDEX_ATTEMPT
+# plugins.security.audit.config.disabled_transport_categories: GRANTED_PRIVILEGES
+plugins.security.audit.config.disabled_rest_categories: NONE
+plugins.security.audit.config.disabled_transport_categories: NONE
+
+# Log request body:
+plugins.security.audit.config.log_request_body: true
+
+# Dont log bulk as separate requests, log them as a single request:
+plugins.security.audit.config.resolve_bulk_requests: false

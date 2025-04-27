@@ -1,0 +1,26 @@
+server.host: "0.0.0.0"
+opensearch.hosts:
+  - https://opensearch-node1:9200
+  - https://opensearch-node2:9200
+
+opensearch.ssl.verificationMode: none
+opensearch.ssl.certificateAuthorities: /usr/share/opensearch-dashboards/config/certs/root-ca.pem
+#opensearch.ssl.certificate: /usr/share/opensearch-dashboards/config/certs/kibana.pem
+#opensearch.ssl.key: /usr/share/opensearch-dashboards/config/certs/kibana-key.pem
+
+opensearch.username: "admin"
+opensearch.password: "1nf0M@t1cs"
+
+opensearch.requestHeadersWhitelist:
+  - authorization
+  - securitytenant
+
+opensearch_security.multitenancy.enabled: true
+opensearch_security.multitenancy.tenants.enable_global: true
+opensearch_security.multitenancy.tenants.enable_private: true
+opensearch_security.readonly_mode.roles:
+  - kibana_read_only
+
+logging:
+  dest: stdout
+  verbose: false

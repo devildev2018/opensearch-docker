@@ -1,0 +1,10 @@
+_meta:
+  type: "nodesdn"
+  config_version: 2
+  cluster1:
+    nodes_dn:
+        - "CN=admin"
+        - "CN=opensearch-node1"
+        - "CN=opensearch-node2"
+        - "CN=opensearch-node3"
+        - "CN=opensearch-node4"
