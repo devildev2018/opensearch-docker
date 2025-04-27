@@ -32,19 +32,6 @@ Docker Compose
 
 Make sure Docker Desktop is installed and running on your machine.
 
-"
-├── docker-compose.yml       # Docker Compose file to set up the OpenSearch, Logstash, Filebeat stack
-├── certs/                   # Directory to store SSL certificates
-│   ├── root-ca.key          # Root Certificate Authority key
-│   ├── root-ca.pem          # Root Certificate Authority certificate
-│   ├── opensearch-nodes.pem # Certificate for OpenSearch nodes
-│   ├── opensearch-nodes-key.pem  # Private key for OpenSearch nodes
-│   ├── opensearch-dashboards.pem # Certificate for OpenSearch Dashboards
-│   ├── opensearch-dashboards-key.pem  # Private key for Dashboards
-│   └── admin.pem            # Admin certificate for authentication
-└── elastic-agent.yml        # Filebeat configuration (optional, if using Filebeat)
-"
-
 Setup:
 Step 1: Generate SSL Certificates
 Before starting the Docker Compose stack, you need to generate the SSL certificates for OpenSearch, Logstash, and Filebeat using the provided generate-certs.sh script.
