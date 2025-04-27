@@ -1,9 +1,34 @@
 filebeat.inputs:
-  - type: filestream
-    enabled: true
-    paths:
-      - /host/var/log/*.log
+- type: container
+  paths:
+    - '/var/lib/docker/containers/*/*.log'
+  enabled: true
+  tags: ["container-log"]
+
+name: filebeat
+
+filebeat.config.modules:
+  path: ${path.config}/modules.d/*.yml
+  reload.enabled: false
+setup.template.settings:
+  index.number_of_shards: 1
+setup.kibana:
 
 output.logstash:
-  hosts: ["logstash:5044"]
+  hosts: "logstash:5044"
+filebeat.modules:
+- module: system
+  syslog:
+    enabled: true
+    var.paths: ["/var/log/host/system.log"]
+  auth:
+    enabled: true
+    var.paths: ["/var/log/host/wifi.log"]
+processors:
+  - add_docker_metadata:
+      host: "unix:///var/run/docker.sock"
 
+filebeat.autodiscover:
+  providers:
+    - type: docker
+      hints.enabled: true

@@ -1,0 +1,221 @@
+version: "3.8"  # Updated from 2.4 to 3.8 for better features
+
+services:
+  opensearch-node1:
+    image: opensearchproject/opensearch:2.19.1  # Pinned version instead of latest
+    container_name: opensearch-node1
+    hostname: opensearch-node1
+    environment:
+      - cluster.name=opensearch-cluster
+      - discovery.seed_hosts=opensearch-node1,opensearch-node2,opensearch-node3,opensearch-node4
+      - cluster.initial_cluster_manager_nodes=opensearch-node1,opensearch-node2
+      - node.name=opensearch-node1
+      - node.roles=cluster_manager,data,ingest
+      - bootstrap.memory_lock=true
+      #- OPENSEARCH_INITIAL_ADMIN_PASSWORD=1nf0M@t1cs
+      - OPENSEARCH_JAVA_OPTS=-Xms1g -Xmx1g
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    volumes:
+      - ./opensearch-data1:/usr/share/opensearch/data
+      - ./certs/:/usr/share/opensearch/config/certs
+      - ./opensearch.yml:/usr/share/opensearch/config/opensearch.yml:ro
+      - ./logs/opensearch-node1:/usr/share/opensearch/logs
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s -k https://localhost:9200 -u admin:admin | grep -q 'opensearch-cluster'"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    ports:
+      - 9200:9200
+      - 9600:9600
+    networks:
+      - opensearch-net
+
+  opensearch-node2:
+    image: opensearchproject/opensearch:2.19.1
+    container_name: opensearch-node2
+    hostname: opensearch-node2
+    environment:
+      - cluster.name=opensearch-cluster
+      - discovery.seed_hosts=opensearch-node1,opensearch-node2,opensearch-node3,opensearch-node4
+      - node.name=opensearch-node2
+      - node.roles=cluster_manager,data,ingest
+      - bootstrap.memory_lock=true
+      #- OPENSEARCH_INITIAL_ADMIN_PASSWORD=1nf0M@t1cs
+      - OPENSEARCH_JAVA_OPTS=-Xms1g -Xmx1g
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    volumes:
+      - ./opensearch-data2:/usr/share/opensearch/data
+      - ./certs/:/usr/share/opensearch/config/certs:ro
+      - ./opensearch.yml:/usr/share/opensearch/config/opensearch.yml:ro
+      - ./logs/opensearch-node2:/usr/share/opensearch/logs
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s -k https://localhost:9200 -u admin:admin | grep -q 'opensearch-cluster'"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    networks:
+      - opensearch-net
+    depends_on:
+      - opensearch-node1
+
+  opensearch-node3:
+    image: opensearchproject/opensearch:2.19.1
+    container_name: opensearch-node3
+    hostname: opensearch-node3
+    environment:
+      - cluster.name=opensearch-cluster
+      - discovery.seed_hosts=opensearch-node1,opensearch-node2,opensearch-node3,opensearch-node4
+      - node.name=opensearch-node3
+      - node.roles=data,ingest
+      - bootstrap.memory_lock=true
+      #- OPENSEARCH_INITIAL_ADMIN_PASSWORD=1nf0M@t1cs
+      - OPENSEARCH_JAVA_OPTS=-Xms1g -Xmx1g
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    volumes:
+      - ./opensearch-data3:/usr/share/opensearch/data
+      - ./certs/:/usr/share/opensearch/config/certs:ro
+      - ./opensearch.yml:/usr/share/opensearch/config/opensearch.yml:ro
+      - ./logs/opensearch-node3:/usr/share/opensearch/logs
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s -k https://localhost:9200 -u admin:admin | grep -q 'opensearch-cluster'"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    networks:
+      - opensearch-net
+    depends_on:
+      - opensearch-node1
+      - opensearch-node2
+
+  opensearch-node4:
+    image: opensearchproject/opensearch:2.19.1
+    container_name: opensearch-node4
+    hostname: opensearch-node4
+    environment:
+      - cluster.name=opensearch-cluster
+      - discovery.seed_hosts=opensearch-node1,opensearch-node2,opensearch-node3,opensearch-node4
+      - node.name=opensearch-node4
+      - node.roles=data,ingest
+      - bootstrap.memory_lock=true
+      #- OPENSEARCH_INITIAL_ADMIN_PASSWORD=1nf0M@t1cs
+      - OPENSEARCH_JAVA_OPTS=-Xms1g -Xmx1g
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    volumes:
+      - ./opensearch-data4:/usr/share/opensearch/data
+      - ./certs/:/usr/share/opensearch/config/certs:ro
+      - ./opensearch.yml:/usr/share/opensearch/config/opensearch.yml:ro
+      - ./logs/opensearch-node4:/usr/share/opensearch/logs
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s -k https://localhost:9200 -u admin:admin | grep -q 'opensearch-cluster'"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    networks:
+      - opensearch-net
+    depends_on:
+      - opensearch-node1
+      - opensearch-node2
+
+  opensearch-dashboards:
+    image: opensearchproject/opensearch-dashboards:2.19.1  # Version pinned to match OpenSearch
+    container_name: opensearch-dashboards
+    ports:
+      - 5601:5601
+    environment:
+      OPENSEARCH_HOSTS: '["https://opensearch-node1:9200","https://opensearch-node2:9200"]'
+      OPENSEARCH_USERNAME: "admin"
+      OPENSEARCH_PASSWORD: "admin"
+      OPENSEARCH_SSL_VERIFICATION_MODE: "none"  # Only for testing, remove for production
+    volumes:
+      - ./opensearch_dashboards.yml:/usr/share/opensearch-dashboards/config/opensearch_dashboards.yml:ro
+      - ./certs/:/usr/share/opensearch-dashboards/config/certs:ro
+    networks:
+      - opensearch-net
+    depends_on:
+      opensearch-node1:
+        condition: service_healthy
+      opensearch-node2:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s -k http://localhost:5601/api/status | grep -q 'running'"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+
+#Logstash config
+  logstash:
+    image: opensearchproject/logstash-oss-with-opensearch-output-plugin:latest
+    container_name: logstash
+    ports:
+      - 8080:8080  # HTTP input
+      - 5044:5044  # Beats input (optional)
+      - 9800:9800  # API/healthcheck
+    environment:
+      - LS_JAVA_OPTS=-Xms1g -Xmx1g
+      - LOGSTASH_HTTP_ENABLED=true  # Enable HTTP API
+      - LOGSTASH_HTTP_HOST=0.0.0.0  # Listen on all network interfaces
+      - LOGSTASH_HTTP_PORT=9600  # Default port for Logstash HTTP API
+    volumes:
+      - ./logstash/pipeline/:/usr/share/logstash/pipeline/
+      - ./logstash/pipeline.yml:/usr/share/logstash/config/pipeline.yml
+      - ./certs/:/usr/share/logstash/certs:ro
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9600/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    depends_on:
+      - opensearch-node3
+      - opensearch-node4
+    networks:
+      - opensearch-net
+#Filbeat Config
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:8.12.1
+    container_name: filebeat
+    user: root
+    restart: always
+    volumes:
+      - ./filebeat.yml:/usr/share/filebeat/filebeat.yml  # Mount the Filebeat config file
+      - /var/lib/docker/containers:/var/lib/docker/containers  # Docker containers logs
+      - /var/log/:/var/log/host  # Host logs
+      - filebeat-data:/usr/share/filebeat/data/  # Persist filebeat data
+      - /var/run/docker.sock:/var/run/docker.sock  # Docker socket
+    networks:
+      - opensearch-net
+volumes:
+  opensearch-data1:
+  opensearch-data2:
+  opensearch-data3:
+  opensearch-data4:
+  filebeat-data:
+
+networks:
+  opensearch-net:
+    driver: bridge

@@ -1,15 +1,23 @@
 server.host: "0.0.0.0"
+
+# Enable HTTPS on OpenSearch Dashboards server (itself)
+server.ssl.enabled: true
+server.ssl.certificate: /usr/share/opensearch-dashboards/config/certs/opensearch-dashboards.pem
+server.ssl.key: /usr/share/opensearch-dashboards/config/certs/opensearch-dashboards-key.pem
+
+# Connect securely to OpenSearch
 opensearch.hosts:
   - https://opensearch-node1:9200
   - https://opensearch-node2:9200
 
-opensearch.ssl.verificationMode: none
+opensearch.ssl.verificationMode: full  # Validate the OpenSearch server certificate properly
 opensearch.ssl.certificateAuthorities: /usr/share/opensearch-dashboards/config/certs/root-ca.pem
-#opensearch.ssl.certificate: /usr/share/opensearch-dashboards/config/certs/kibana.pem
-#opensearch.ssl.key: /usr/share/opensearch-dashboards/config/certs/kibana-key.pem
+# (optional) If you want mutual TLS (client cert authentication), you can uncomment below:
+# opensearch.ssl.certificate: /usr/share/opensearch-dashboards/config/certs/kibana.pem
+# opensearch.ssl.key: /usr/share/opensearch-dashboards/config/certs/kibana-key.pem
 
 opensearch.username: "admin"
-opensearch.password: "1nf0M@t1cs"
+opensearch.password: "admin"
 
 opensearch.requestHeadersWhitelist:
   - authorization

@@ -44,8 +44,8 @@ plugins.security.ssl.transport.pemkey_filepath: certs/admin-key.pem
 plugins.security.ssl.transport.pemtrustedcas_filepath: certs/root-ca.pem
 plugins.security.ssl.transport.enabled: true
 plugins.security.ssl.http.enabled: true
-plugins.security.ssl.http.pemcert_filepath: certs/elkstack-node.pem
-plugins.security.ssl.http.pemkey_filepath: certs/elkstack-node-key.pem
+plugins.security.ssl.http.pemcert_filepath: certs/opensearch-nodes.pem
+plugins.security.ssl.http.pemkey_filepath: certs/opensearch-nodes-key.pem
 plugins.security.ssl.http.pemtrustedcas_filepath: certs/root-ca.pem
 plugins.security.ssl.transport.enforce_hostname_verification: false
 plugins.security.ssl.transport.resolve_hostname: false
